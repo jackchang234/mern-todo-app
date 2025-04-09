@@ -1,0 +1,22 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# 複製package.json
+COPY package*.json ./
+
+# 安裝依賴
+RUN npm install
+
+# 複製應用程序代碼
+COPY . .
+
+# 設置環境變量
+ENV NODE_ENV=production
+ENV PORT=5000
+
+# 暴露端口
+EXPOSE 5000
+
+# 啟動應用程序
+CMD ["npm", "start"] 

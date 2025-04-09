@@ -9,6 +9,7 @@
 - 待辦事項的創建、讀取、更新和刪除 (CRUD)
 - 響應式設計
 - 使用Material-UI組件
+- Docker容器化部署
 
 ## 技術棧
 
@@ -16,21 +17,45 @@
 - **後端**：Node.js, Express
 - **數據庫**：MongoDB
 - **認證**：JWT, Google OAuth
+- **容器化**：Docker, Docker Compose
 
 ## 安裝與運行
 
-### 前提條件
+### 使用Docker（推薦）
+
+1. 安裝Docker和Docker Compose
+   - [Docker安裝指南](https://docs.docker.com/get-docker/)
+   - [Docker Compose安裝指南](https://docs.docker.com/compose/install/)
+
+2. 克隆倉庫
+   ```
+   git clone https://github.com/jackchang234/mern-todo-app.git
+   cd mern-todo-app
+   ```
+
+3. 使用Docker Compose啟動應用
+   ```
+   docker-compose up
+   ```
+
+4. 訪問應用
+   - 前端: http://localhost:3000
+   - 後端API: http://localhost:5000
+
+### 傳統安裝
+
+#### 前提條件
 
 - Node.js
 - npm 或 yarn
 - MongoDB (本地或Atlas雲服務)
 
-### 安裝步驟
+#### 安裝步驟
 
 1. 克隆倉庫
    ```
-   git clone <repository-url>
-   cd mern-stack
+   git clone https://github.com/jackchang234/mern-todo-app.git
+   cd mern-todo-app
    ```
 
 2. 安裝依賴
@@ -71,23 +96,28 @@ npm run test:coverage
 ## 項目結構
 
 ```
-mern-stack/
+mern-todo-app/
 ├── .github/           # GitHub Actions工作流配置
 ├── client/            # React前端
 │   ├── public/        # 靜態文件
-│   └── src/           # 源代碼
-│       ├── components/  # 可重用組件
-│       ├── contexts/    # 上下文（包括認證）
-│       ├── pages/       # 頁面組件
-│       └── services/    # API服務
+│   ├── src/           # 源代碼
+│   │   ├── components/  # 可重用組件
+│   │   ├── contexts/    # 上下文（包括認證）
+│   │   ├── pages/       # 頁面組件
+│   │   └── services/    # API服務
+│   ├── Dockerfile.client  # 前端Docker配置
+│   └── nginx.conf      # Nginx配置
 ├── server/            # Node.js後端
 │   ├── config/        # 配置文件
 │   ├── controllers/   # 路由控制器
 │   ├── middleware/    # 中間件
 │   ├── models/        # 數據模型
 │   ├── routes/        # API路由
-│   └── tests/         # 測試文件
-└── .env               # 環境變量
+│   ├── tests/         # 測試文件
+│   └── Dockerfile.server  # 後端Docker配置
+├── .env               # 環境變量
+├── docker-compose.yml # Docker Compose配置
+└── .dockerignore      # Docker忽略文件
 ```
 
 ## 授權

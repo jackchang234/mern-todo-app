@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # MongoDB服務
+  mongo:
+    image: mongo:latest
+    container_name: mern-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - mern-network
+
+  # 後端API服務
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.server
+    container_name: mern-server
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/mern-todo-app
+      - JWT_SECRET=your_jwt_secret_key_change_this_in_production
+      - PORT=5000
+      - CLIENT_URL=http://localhost:3000
+    networks:
+      - mern-network
+
+  # 前端React應用
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.client
+    container_name: mern-client
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+    networks:
+      - mern-network
+
+# 定義卷和網絡
+volumes:
+  mongo-data:
+
+networks:
+  mern-network:
+    driver: bridge 
