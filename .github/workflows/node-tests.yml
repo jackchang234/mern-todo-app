@@ -1,0 +1,51 @@
+name: Node.js Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    env:
+      JWT_SECRET: test_jwt_secret
+      NODE_ENV: test
+    
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    
+    - name: Install backend dependencies
+      run: |
+        cd server
+        npm ci
+    
+    - name: Run backend tests
+      run: |
+        cd server
+        npm test
+    
+    - name: Generate code coverage report
+      if: success()
+      run: |
+        cd server
+        npm run test:coverage
+    
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: coverage-report
+        path: server/coverage/ 
