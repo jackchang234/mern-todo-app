@@ -8,10 +8,13 @@ const GoogleLogin = () => {
   const googleButtonRef = useRef(null);
 
   useEffect(() => {
+    // 調試：輸出 client_id 值
+    console.log('Google Client ID:', process.env.REACT_APP_GOOGLE_CLIENT_ID);
+    
     // 確保 Google API 已加載完成
     if (window.google && googleButtonRef.current) {
       window.google.accounts.id.initialize({
-        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID',
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
         callback: handleCredentialResponse
       });
 
