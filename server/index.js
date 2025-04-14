@@ -25,15 +25,26 @@ if (!mongoUri) {
   process.exit(1);
 }
 
+// MongoDB 連接選項
+const mongooseOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  retryWrites: true,
+  w: 'majority',
+  // 允許從任何 IP 連接
+  authSource: 'admin',
+  // 增加超時時間
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 45000,
+};
+
 if (process.env.NODE_ENV !== 'test') {
-  mongoose.connect(mongoUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
+  mongoose.connect(mongoUri, mongooseOptions)
   .then(() => console.log('✅ MongoDB 連接成功'))
   .catch(err => {
     console.error('❌ MongoDB 連接失敗:', err);
-    process.exit(1);
+    // 不要立即退出，仍然提供靜態文件
+    console.log('繼續提供網站靜態文件，但數據庫功能將不可用');
   });
 }
 

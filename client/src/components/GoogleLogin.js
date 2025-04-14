@@ -1,54 +1,74 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Typography, Box } from '@mui/material';
+import { Button, Typography, Box, Alert } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 
 // === Google 登入組件開始 ===
 const GoogleLogin = () => {
   const { handleGoogleLogin } = useAuth();
   const googleButtonRef = useRef(null);
-  const [clientIdError, setClientIdError] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // 硬編碼 Google Client ID - 確保在 Render 環境中可用
+  const GOOGLE_CLIENT_ID = '971251904501-8q699c73mjqiof39jnhko8oja0c4kntp.apps.googleusercontent.com';
 
   useEffect(() => {
-    // 獲取 Client ID
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    console.log('Google Client ID:', clientId);
+    // 加載 Google API
+    const loadGoogleAPI = () => {
+      // 檢查是否已加載
+      if (window.google) {
+        initializeGoogleAPI();
+        return;
+      }
+      
+      // 手動加載 Google API
+      const script = document.createElement('script');
+      script.src = `https://accounts.google.com/gsi/client?client_id=${GOOGLE_CLIENT_ID}`;
+      script.onload = () => initializeGoogleAPI();
+      script.onerror = () => setError('無法加載 Google 認證服務');
+      document.body.appendChild(script);
+    };
     
-    // 檢查是否有 Client ID
-    if (!clientId) {
-      console.error('未設置 Google Client ID 環境變數');
-      setClientIdError(true);
-      return;
-    }
+    // 初始化 Google API
+    const initializeGoogleAPI = () => {
+      if (!window.google) {
+        setError('Google API 未正確加載');
+        return;
+      }
+      
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse
+        });
+        
+        window.google.accounts.id.renderButton(
+          googleButtonRef.current,
+          { theme: 'outline', size: 'large', width: '100%' }
+        );
+      } catch (err) {
+        console.error('Google API 初始化錯誤:', err);
+        setError('Google 登入初始化失敗');
+      }
+    };
     
-    // 確保 Google API 已加載完成
-    if (window.google && googleButtonRef.current) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleCredentialResponse
-      });
-
-      window.google.accounts.id.renderButton(
-        googleButtonRef.current,
-        { theme: 'outline', size: 'large', width: '100%' }
-      );
-    }
-  }, [handleGoogleLogin]);
-
+    loadGoogleAPI();
+  }, []);
+  
   const handleCredentialResponse = (response) => {
-    // 處理 Google 返回的 credential
-    if (response.credential) {
+    if (response && response.credential) {
       handleGoogleLogin(response.credential);
     } else {
       console.error('Google 登入失敗：未獲取 credential');
-      alert('Google 登入失敗，請稍後再試');
+      setError('Google 登入失敗，未獲取憑證');
     }
   };
 
-  if (clientIdError) {
+  if (error) {
     return (
-      <Box sx={{ mt: 3, p: 2, bgcolor: '#ffebee', borderRadius: 1 }}>
-        <Typography color="error" variant="body1" align="center">
-          Google 登入未配置正確。請聯繫管理員設置 Google Client ID。
+      <Box sx={{ mt: 3 }}>
+        <Alert severity="error">{error}</Alert>
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          請嘗試刷新頁面或使用其他登入方式。
         </Typography>
       </Box>
     );
