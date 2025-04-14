@@ -25,15 +25,17 @@ if (!mongoUri) {
   process.exit(1);
 }
 
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('✅ MongoDB 連接成功'))
-.catch(err => {
-  console.error('❌ MongoDB 連接失敗:', err);
-  process.exit(1);
-});
+if (process.env.NODE_ENV !== 'test') {
+  mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => console.log('✅ MongoDB 連接成功'))
+  .catch(err => {
+    console.error('❌ MongoDB 連接失敗:', err);
+    process.exit(1);
+  });
+}
 
 // API 路由
 app.use('/api/auth', require('./routes/auth'));
@@ -68,10 +70,14 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 啟動伺服器
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 伺服器運行在 http://localhost:${PORT}`);
-  console.log(`環境: ${process.env.NODE_ENV}`);
-});
+// 只在非測試環境下啟動服務器
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 伺服器運行在 http://localhost:${PORT}`);
+    console.log(`環境: ${process.env.NODE_ENV}`);
+  });
+}
+
+module.exports = app;
 // === 應用初始化結束 === 

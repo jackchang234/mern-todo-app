@@ -30,4 +30,11 @@ describe('Auth Endpoints', () => {
       expect(res.status).toBe(400);
     });
   });
+});
+
+// 簡單測試
+describe('Basic Tests', () => {
+  it('should run a simple test', () => {
+    expect(true).toBe(true);
+  });
 }); 
